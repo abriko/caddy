@@ -35,7 +35,7 @@ jobs:
     uses: abriko/actions/.github/workflows/build-image.yaml@v1
     with:
       name: ${{ github.event.repository.name }}
-      build_args: "--build-arg=\"VERSION=${{ needs.get_settings.outputs.version }}\""
+      build_args: "--build-arg VERSION=${{ needs.get_settings.outputs.version }}"
     needs:
       - get_settings
     secrets: inherit
