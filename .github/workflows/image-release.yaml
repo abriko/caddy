@@ -1,0 +1,44 @@
+name: Image Release
+
+on:
+  push:
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - main
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+    paths:
+      - "src/**"
+      - "e2e_tests/**"
+      - "Dockerfile"
+      - "./.github/workflows/image*.yaml"
+  
+  workflow_dispatch:
+
+jobs:
+  get_settings:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build image
+        id: check
+        run: |
+          source .env
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  build_push:
+    uses: abriko/actions/.github/workflows/build-image.yaml@v1
+    with:
+      name: ${{ github.event.repository.name }}
+      build_args: "--build-arg=\"VERSION=${{ needs.get_settings.outputs.version }}\""
+    needs:
+      - get_settings
+    secrets: inherit
+    permissions:
+      packages: write
+      contents: read
